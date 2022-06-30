@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% form_theme formArticle 'bootstrap_4_layout.html.twig' %}
+
+{% block body %}
+
+	<h1>Gestion d'un article</h1>
+
+    {{ form_start(formArticle) }}
+
+    {{ form_row(formArticle.Nom, {'attr':{'placeholder': "Nom de l'article"}}) }}
+    {{ form_row(formArticle.Prix, {'attr':{'placeholder': "Prix en euros"}}) }}
+    {{ form_row(formArticle.PhotoTicket, {'attr':{'placeholder': "URL de la photo du ticket"}}) }}
+    {{ form_row(formArticle.DateAchat, {'attr':{'placeholder': "Date d'achat"}}) }}
+    {{ form_row(formArticle.DateGarantie, {'attr':{'placeholder': "Date de garantie"}}) }}
+    {{ form_row(formArticle.LieuAchat, {'attr':{'placeholder': "Lieu d'achat"}}) }}
+    {{ form_row(formArticle.ZoneSaisie, {'attr':{'placeholder': "Zone de saisie"}}) }}
+    {{ form_row(formArticle.Notice, {'attr':{'placeholder': "Notice"}}) }}
+
+        <button type="submit" class="btn btn-success">
+            {% if editMode %}
+                Modifier
+            {% else %}  
+                Ajouter l'article 
+            {% endif %} 
+        </button>
+
+    {{ form_end(formArticle) }}
+
+{% endblock %}
