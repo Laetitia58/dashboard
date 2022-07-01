@@ -14,6 +14,8 @@ use Doctrine\Persistence\ManagerRegistry;
 use App\Repository\ArticleRepository;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use App\Form\DashboardType;
+use Symfony\Component\Form\FormBuilderInterface;
+use App\Form\deleteForm;
 
 class DashboardController extends AbstractController
 {
@@ -34,7 +36,7 @@ class DashboardController extends AbstractController
             'age' => 42
         ] );
     }
-
+  
     #[Route("/dashboard/new", name:"dashboard_create")] 
     #[Route("/dashboard/{id}/edit", name:"dashboard_edit")]
     public function form(Article $article = null, Request $request, EntityManagerInterface $manager) {
@@ -74,9 +76,8 @@ class DashboardController extends AbstractController
         if($form->isSubmitted() && $form->isValid()) {
             if(!$article->getId()){
                 $article->setDateAchat(new \DateTime());
+                $article->setDateGarantie(new \DateTime());
             }
-
-            $article->setDateGarantie(new \DateTime());
 
             $manager->persist($article);
             $manager->flush();
@@ -87,7 +88,7 @@ class DashboardController extends AbstractController
 
         return $this->render('dashboard/create.html.twig', [
             'formArticle' => $form->createView(),
-            'editMode' => $article->getId() !==null
+            'editMode' => $article->getId() !==null,
         ]);
     }
 
@@ -98,4 +99,27 @@ class DashboardController extends AbstractController
         ]);  
     }
 
+    #[Route("/dashboard/{id}/delete", name:"dashboard_delete")]
+    public function delete(Request $request, ManagerRegistry $managerRegistry, int $id ) {
+        $entityManager = $managerRegistry -> getManager();
+        $article = $managerRegistry ->getRepository(Article::class)-> find($id);
+        $form =$this->createForm(deleteForm::class,$article);
+        $form ->handleRequest($request);
+         if(!$article){
+            throw $this -> createNotFoundException('Article non trouvé');   
+         }
+         if($form->isSubmitted() && $form->isValid() ){                  
+            $entityManager -> remove($article);
+
+            $entityManager -> flush();
+
+            return $this->render ('dashboard/response.html.twig', [
+                'message' => 'Suppression de l\'article n°'. $id
+            ]);
+         }
+
+         return $this->render ('dashboard/supprimerArticle.html.twig', [
+            'formArticle' => $form->createView(),
+         ]);  
+        }   
 }

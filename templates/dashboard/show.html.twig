@@ -12,8 +12,12 @@
         <div class"metadata"><h5>Lieu d'achat</h5>{{ article.LieuAchat | raw }}</div>
         <p><h5>Zone de saisie</h5>{{ article.ZoneSaisie | raw }}</p>
         <p><h5>Notice</h5>{{ article.Notice | raw }}</p>
-    </div>    
+    </div>  
 </article>
+        <button type="submit" class="btn btn-success">
+                Modifier 
+        </button>
+        <a href={{ "/dashboard/" ~ article.id ~ "/delete" }}>Supprimer</a>
 
 {% endblock %}
        
