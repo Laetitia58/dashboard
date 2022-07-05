@@ -33,16 +33,16 @@ class Article
     private $Date_Garantie;
 
     #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\Length(min:10, max:255)]
+    #[Assert\Length(min:0, max:255)]
     private $Lieu_Achat;
     
 
     #[ORM\Column(type: 'text')]
-    #[Assert\Length(min:10, max:255)]
+    #[Assert\Length(min:0, max:255)]
     private $Zone_Saisie;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    #[Assert\Length(max:255)]
+    #[Assert\Length(min:0,max:255)]
     private $Notice;
 
     public function getId(): ?int
