@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Repository\ArticleRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 class Article
@@ -14,36 +13,34 @@ class Article
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    
-    #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\Length(min:10, max:255, minMessage:"Minumum 10 caractères")]
-    private $Nom;
+    #[ORM\Column(type: 'string', length: 50)]
+    private $nom;
+
+    #[ORM\Column(type: 'datetime')]
+    private $date_achat;
+
+    #[ORM\Column(type: 'date')]
+    private $date_garantie;
 
     #[ORM\Column(type: 'integer')]
-    private $Prix;
-
-    #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\Url()]
-    private $Photo_ticket;
-
-    #[ORM\Column(type: 'date')]
-    private $Date_Achat;
-
-    #[ORM\Column(type: 'date')]
-    private $Date_Garantie;
-
-    #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\Length(min:10, max:255)]
-    private $Lieu_Achat;
-    
-
-    #[ORM\Column(type: 'text')]
-    #[Assert\Length(min:10, max:255)]
-    private $Zone_Saisie;
+    private $prix;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    #[Assert\Length(max:255)]
-    private $Notice;
+    private $zone_saisie;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private $notice;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private $photo;
+
+    #[ORM\ManyToOne(targetEntity: Categorie::class, inversedBy: 'articles')]
+    #[ORM\JoinColumn(nullable: false)]
+    private $categorie;
+
+    #[ORM\ManyToOne(targetEntity: LieuAchat::class, inversedBy: 'articles')]
+    #[ORM\JoinColumn(nullable: false)]
+    private $lieu_achat;
 
     public function getId(): ?int
     {
@@ -52,96 +49,108 @@ class Article
 
     public function getNom(): ?string
     {
-        return $this->Nom;
+        return $this->nom;
     }
 
-    public function setNom(string $Nom): self
+    public function setNom(string $nom): self
     {
-        $this->Nom = $Nom;
-
-        return $this;
-    }
-
-    public function getPrix(): ?int
-    {
-        return $this->Prix;
-    }
-
-    public function setPrix(int $Prix): self
-    {
-        $this->Prix = $Prix;
-
-        return $this;
-    }
-
-    public function getPhotoTicket(): ?string
-    {
-        return $this->Photo_ticket;
-    }
-
-    public function setPhotoTicket(string $Photo_ticket): self
-    {
-        $this->Photo_ticket = $Photo_ticket;
+        $this->nom = $nom;
 
         return $this;
     }
 
     public function getDateAchat(): ?\DateTimeInterface
     {
-        return $this->Date_Achat;
+        return $this->date_achat;
     }
 
-    public function setDateAchat(\DateTimeInterface $Date_Achat): self
+    public function setDateAchat(\DateTimeInterface $date_achat): self
     {
-        $this->Date_Achat = $Date_Achat;
+        $this->date_achat = $date_achat;
 
         return $this;
     }
 
     public function getDateGarantie(): ?\DateTimeInterface
     {
-        return $this->Date_Garantie;
+        return $this->date_garantie;
     }
 
-    public function setDateGarantie(\DateTimeInterface $Date_Garantie): self
+    public function setDateGarantie(\DateTimeInterface $date_garantie): self
     {
-        $this->Date_Garantie = $Date_Garantie;
+        $this->date_garantie = $date_garantie;
 
         return $this;
     }
 
-    public function getLieuAchat(): ?string
+    public function getPrix(): ?int
     {
-        return $this->Lieu_Achat;
+        return $this->prix;
     }
 
-    public function setLieuAchat(string $Lieu_Achat): self
+    public function setPrix(int $prix): self
     {
-        $this->Lieu_Achat = $Lieu_Achat;
+        $this->prix = $prix;
 
         return $this;
     }
 
     public function getZoneSaisie(): ?string
     {
-        return $this->Zone_Saisie;
+        return $this->zone_saisie;
     }
 
-    public function setZoneSaisie(string $Zone_Saisie): self
+    public function setZoneSaisie(?string $zone_saisie): self
     {
-        $this->Zone_Saisie = $Zone_Saisie;
+        $this->zone_saisie = $zone_saisie;
 
         return $this;
     }
 
     public function getNotice(): ?string
     {
-        return $this->Notice;
+        return $this->notice;
     }
 
-    public function setNotice(?string $Notice): self
+    public function setNotice(?string $notice): self
     {
-        $this->Notice = $Notice;
+        $this->notice = $notice;
+
+        return $this;
+    }
+
+    public function getPhoto(): ?string
+    {
+        return $this->photo;
+    }
+
+    public function setPhoto(string $photo): self
+    {
+        $this->photo = $photo;
+
+        return $this;
+    }
+
+    public function getCategorie(): ?Categorie
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?Categorie $categorie): self
+    {
+        $this->categorie = $categorie;
+
+        return $this;
+    }
+
+    public function getLieuAchat(): ?LieuAchat
+    {
+        return $this->lieu_achat;
+    }
+
+    public function setLieuAchat(?LieuAchat $lieu_achat): self
+    {
+        $this->lieu_achat = $lieu_achat;
 
         return $this;
     }
