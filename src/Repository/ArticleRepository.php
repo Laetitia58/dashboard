@@ -6,7 +6,7 @@ use App\Entity\Article;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
+/**@extends ServiceEntityRepository<Article>
  * @extends ServiceEntityRepository<Articles>
  *
  * @method Article|null find($id, $lockMode = null, $lockVersion = null)
