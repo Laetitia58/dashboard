@@ -11,6 +11,7 @@
 <h1>Statistiques</h1>
 <canvas id="categorias1" width"400" height:"100"></canvas>
 <canvas id="categorias2" width"400" height:"100"></canvas>
+<canvas id="categorias3" width"400" height:"100"></canvas>
 </div>
 {% endblock %}
 
@@ -41,7 +42,20 @@
                 backgroundColor: ["pink", "green", "yellow", "red", "blue"]
             }]
         }
-    })    
+    })  
+
+    let categorias3 = document.querySelector("#categorias3")
+    let categGraph3 = new Chart(categorias3,{
+        type: "line",
+        data: {
+            labels:["DeuxRoues", "Loisirs", "Patins", "Pièces", "Accessoires"],
+            datasets: [{
+                label: "Répartition des catégories",
+                data: [4, 4, 3, 4, 6],
+                backgroundColor: ["pink", "green", "yellow", "red", "blue"]
+            }]
+        }
+    })       
     
 </script>
 {% endblock %}
