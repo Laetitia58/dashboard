@@ -7,7 +7,6 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- *
  * @extends ServiceEntityRepository<Articles>
  *
  * @method Article|null find($id, $lockMode = null, $lockVersion = null)
@@ -46,7 +45,36 @@ class ArticleRepository extends ServiceEntityRepository
         $myQuery -> andWhere('a.nom LIKE :val');
         $myQuery -> setParameter(':val', '%'.$value.'%');
         foreach($conditions as $key => $myValue){
-            $myQuery -> andWhere('a.'.$key.'='.$myValue);
+            if(is_array($myValue)){
+                if($key == 'date_achat'){
+                    if($myValue[0] == 'apres'){
+                        $myQuery -> andWhere('a.'.$key.'> \''.$myValue[1].'\'');
+                    }else{
+                        $myQuery -> andWhere('a.'.$key.'< \''.$myValue[1].'\'');
+                    }
+                }elseif($key == 'prix'){
+                    if($myValue[0] == 'sup'){
+                        $myQuery -> andWhere('a.'.$key.'>'.$myValue[1].'');
+                    }else{
+                        $myQuery -> andWhere('a.'.$key.'<'.$myValue[1].'');
+                    }
+                }else{
+                    $arrayQuery = '(a.'.$key.'='.array_shift($myValue)->getId();
+                    foreach($myValue as $oneValue){
+                        $arrayQuery = $arrayQuery.' OR a.'.$key.'='.($oneValue)->getId();
+                    }
+                    $arrayQuery = $arrayQuery.' )';
+                    $myQuery-> andWhere($arrayQuery);
+                }
+            }elseif($key == 'date_garantie'){
+                if($myValue == 'oui'){
+                    $myQuery -> andWhere('a.'.$key.'>= \''.(date('Y-m-d', (new \DateTime())->getTimestamp())).'\'');
+                }else{
+                    $myQuery -> andWhere('a.'.$key.'< \''.(date('Y-m-d', (new \DateTime())->getTimestamp())).'\'');
+                }
+            }else{
+                $myQuery -> andWhere('a.'.$key.'='.$myValue);
+            }
         }
         $myQuery->orderBy('a.'.$type, $sens);
         $myQuery->setMaxResults($limit);
