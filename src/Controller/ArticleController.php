@@ -9,6 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 use App\Entity\Article;
 use App\Entity\Categorie;
+use App\Entity\LieuAchat;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\AddArticleFormType;
@@ -70,14 +71,9 @@ class ArticleController extends AbstractController
         $form = $this->createForm(rechercheType::class, $article);
         $form->handleRequest($request);
 
-        $articles = $repository -> findAll();
+        $categories = $doctrine->getRepository(Categorie::class);
 
-        $maxArticles = count($articles);
-
-        $categories = $doctrine->getRepository(Categorie::class)->findBy(
-            array(),
-            array('id' => 'ASC')
-        );
+        $lieux = $doctrine->getRepository(LieuAchat::class);
 
         $conditions = array();
 
@@ -89,51 +85,99 @@ class ArticleController extends AbstractController
         $tri = $request->query->get('tri');
         $sens = $request->query->get('sens');
         $categorie = $request->query->get('categorie');
+        $lieu = $request->query->get('lieu');
+        $distance = $request->query->get('distance');
+        $garantie = $request->query->get('garantie');
+        $apres = $request->query->get('apres');
+        $avant = $request->query->get('avant');
+        $sup = $request->query->get('sup');
+        $inf = $request->query->get('inf');
 
         if(!isset($max)){
             $max = '25';
         }
+
         if(!isset($page)){
             $page = '1';
         }
+
         if(!isset($tri)){
             $tri = 'id';
         }
+
         if(!isset($sens)){
             $sens = 'ASC';
         }
+
         if(!isset($categorie) || $categorie == ''){
             $categorie = '';
         }else{
-            $conditions = array_fill_keys(['categorie'], $categorie);
+            $conditions = array_merge($conditions, array_fill_keys(['categorie'], $categorie));
         }
 
-        if(isset($nom) && $nom != ''){
-            $myPage = $repository ->search(
-                $nom,
-                $conditions,
-                $tri,
-                $sens,
-                $max,
-                $max * ($page - 1),
-            );
-
-            $articles = $repository ->search(
-                $nom,
-                $conditions
-            );
-
-            $maxArticles = count($articles);
-
+        if(!isset($lieu) || $lieu == ''){
+            $lieu = '';
+            if(!isset($distance) || $distance == ''){
+                $distance = '';
+            }else{
+                $mesLieux = $lieux->findBy(['type' => $distance]);
+                $conditions = array_merge($conditions, array_fill_keys(['lieu_achat'], $mesLieux));
+            }
         }else{
-            $nom = '';
-            $myPage = $repository -> findBy(
-                $conditions,
-                array($tri => $sens),
-                $max,
-                $max * ($page - 1),
-            );
+            $conditions = array_merge($conditions, array_fill_keys(['lieu_achat'], $lieu));
+            if(!isset($distance) || $distance == ''){
+                $distance = '';
+            }
         }
+
+        if(!isset($garantie) || $garantie == ''){
+            $garantie = '';
+        }else{
+            $conditions = array_merge($conditions, array_fill_keys(['date_garantie'], $garantie));
+        }
+        if(!isset($apres) || $apres == ''){
+            $apres = '';
+        }else{
+            $conditions = array_merge($conditions, array_fill_keys(['date_achat'], ['apres', $apres]));
+        }
+
+        if(!isset($avant) || $avant == ''){
+            $avant = '';
+        }else{
+            $conditions = array_merge($conditions, array_fill_keys(['date_achat'], ['avant', $avant]));
+        }
+
+        if(!isset($sup) || $sup == ''){
+            $sup = '';
+        }else{
+            $conditions = array_merge($conditions, array_fill_keys(['prix'], ['sup', $sup]));
+        }
+
+        if(!isset($inf) || $inf == ''){
+            $inf = '';
+        }else{
+            $conditions = array_merge($conditions, array_fill_keys(['prix'], ['inf', $inf]));
+        }
+
+        if(!isset($nom)){
+            $nom = '';
+        }
+
+        $myPage = $repository ->search(
+            $nom,
+            $conditions,
+            $tri,
+            $sens,
+            $max,
+            $max * ($page - 1),
+        );
+
+        $articles = $repository ->search(
+            $nom,
+            $conditions
+        );
+        
+        $maxArticles = count($articles);
 
         $maxPages = ceil($maxArticles / $max);
 
@@ -154,7 +198,15 @@ class ArticleController extends AbstractController
             'form' => $form,
             'nom' => $nom,
             'categories' => $categories,
-            'categorie' => $categorie
+            'categorie' => $categorie,
+            'lieuxachats' => $lieux,
+            'lieu' => $lieu,
+            'distance' => $distance,
+            'garantie' => $garantie,
+            'apres' => $apres,
+            'avant' => $avant,
+            'sup' => $sup,
+            'inf' => $inf,
         ]);
     }
 
