@@ -6,7 +6,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 use App\Entity\Categorie;
 use App\Form\AddCategorieFormType;
 use App\Form\DeleteCategorieFormType;
@@ -17,6 +16,7 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class CategorieController extends AbstractController
 {
+
     #[Route('/categorie/add', name: 'create_categorie')]
     public function createcategorie(Request $request, ManagerRegistry $doctrine): Response
     {
@@ -48,8 +48,7 @@ class CategorieController extends AbstractController
 
     #[Route('/categorie/delete/{id}', name: 'categorie_delete')]
     public function delete(Request $request, ManagerRegistry $doctrine, int $id): Response
-    {
-        
+    {        
         $entityManager = $doctrine->getManager();
         $categorie = $doctrine->getRepository(Categorie::class)->find($id);
         $form = $this->createForm(DeleteCategorieFormType::class, $categorie);
@@ -84,8 +83,7 @@ class CategorieController extends AbstractController
 
     #[Route('/categorie/{id}', name: 'categorie_update')]
     public function update(Request $request, ManagerRegistry $doctrine, int $id): Response
-    {
-        
+    {       
         $entityManager = $doctrine->getManager();
         $categorie = $doctrine->getRepository(Categorie::class)->find($id);
         $form = $this->createForm(AddCategorieFormType::class, $categorie);
@@ -158,7 +156,6 @@ class CategorieController extends AbstractController
 
         $maxPages = ceil($maxCategories / $max);
         
-
         if (!$repository -> findAll()) {
             throw $this->createNotFoundException(
                 'No article found.'
