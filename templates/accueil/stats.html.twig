@@ -27,11 +27,11 @@
     let categGraph1 = new Chart(categorias1,{
         type: "pie",
         data: {
-            labels:["DeuxRoues", "Loisirs", "Patins", "Pièces", "Accessoires"],
+            labels: {{ categNom|raw }},
             datasets: [{
-                label: "Répartition des catégories",
-                data: [4, 4, 3, 4, 6],
-                backgroundColor: ["pink", "green", "yellow", "red", "blue"]
+                label: "Répartition des catégories",  
+                data: {{ categCount|raw }},
+                backgroundColor: {{ categColor|raw }}
             }]
         }
     })

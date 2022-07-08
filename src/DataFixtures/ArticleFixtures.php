@@ -12,7 +12,7 @@ class ArticleFixtures extends Fixture
 {
     public function load(ObjectManager $manager)
     {
-        // create 20 products! Bam!
+        // create 20 products
         for ($i = 0; $i < 300; $i++) {
             $product = new Article();
             $product->setNom('product n°'.$i);
@@ -21,7 +21,7 @@ class ArticleFixtures extends Fixture
             $product->setDateAchat(new \DateTime());
             $product->setDateGarantie(new \DateTime('@'.strtotime('+1 year')));
             $product->setPrix(mt_rand(100, 10000));
-            $product->setPhoto('ticket.jpg');
+            $product->setPhotoTicket('ticket.jpg');
             $manager->persist($product);
         }
 

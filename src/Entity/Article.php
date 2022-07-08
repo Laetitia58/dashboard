@@ -37,7 +37,6 @@ class Article
     #[ORM\ManyToOne(targetEntity: Categorie::class, inversedBy: 'articles')]
     #[ORM\JoinColumn(nullable: false)]
     private $categorie;
-
     #[ORM\ManyToOne(targetEntity: LieuAchat::class, inversedBy: 'articles')]
     #[ORM\JoinColumn(nullable: false)]
     private $lieu_achat;
@@ -118,12 +117,10 @@ class Article
 
         return $this;
     }
-
     public function getPhoto(): ?string
     {
         return $this->photo;
     }
-
     public function setPhoto(string $photo): self
     {
         $this->photo = $photo;

@@ -10,8 +10,8 @@ class LieuAchatFixtures extends Fixture
 {
     public function load(ObjectManager $manager)
     {
-        // create 20 products! Bam!
-        $type=['a distance', 'sur place'];
+        // create 20 products
+        $type=['à distance', 'sur place'];
         for ($i = 0; $i < 10; $i++) {
             $product = new LieuAchat();
             $product->setNom('LieuAchat n°'.$i);

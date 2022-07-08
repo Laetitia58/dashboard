@@ -10,7 +10,7 @@ class CategorieFixtures extends Fixture
 {
     public function load(ObjectManager $manager)
     {
-        // create 20 products! Bam!
+        // create 20 products
         for ($i = 0; $i < 5; $i++) {
             $product = new Categorie();
             $product->setNom('Categorie n°'.$i);

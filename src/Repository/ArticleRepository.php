@@ -55,6 +55,19 @@ class ArticleRepository extends ServiceEntityRepository
         return $myQuery;
     }
 
+/*
+*returns global prices's per categories
+*@return void
+*/
+    public function countByPrice(){
+       $query = $this->createQueryBuilder('p')
+       ->select('SUBSTRING(1, 10) as priceCategorie, COUNT(p) as count')
+       ->groupBy('priceCategorie')
+       ;
+       return $query->getQuery()->getResult();
+    }
+
+
 //    /**
 //     * @return Article[] Returns an array of Article objects
 //     */
