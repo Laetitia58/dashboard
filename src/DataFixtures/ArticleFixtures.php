@@ -21,7 +21,7 @@ class ArticleFixtures extends Fixture
             $product->setDateAchat(new \DateTime());
             $product->setDateGarantie(new \DateTime('@'.strtotime('+1 year')));
             $product->setPrix(mt_rand(100, 10000));
-            $product->setPhotoTicket('ticket.jpg');
+            $product->setPhoto('ticket.jpg');
             $manager->persist($product);
         }
 
