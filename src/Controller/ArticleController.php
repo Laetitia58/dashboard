@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
+
 use App\Entity\Article;
 use App\Entity\Categorie;
 use App\Entity\LieuAchat;
@@ -15,11 +16,19 @@ use App\Form\AddArticleFormType;
 use App\Form\DeleteArticleFormType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 use App\Form\rechercheType;
 
 class ArticleController extends AbstractController
 {
+    private $requestStack;
+
+    public function __construct(RequestStack $requestStack)
+    {
+        $this->requestStack = $requestStack;
+    }
+
     #[Route('/article/add', name: 'create_article')]
     public function createarticle(Request $request, ManagerRegistry $doctrine): Response
     {
@@ -66,7 +75,6 @@ class ArticleController extends AbstractController
         $repository = $doctrine->getRepository(Article::class);
 
         $article = new Article();
-
         $form = $this->createForm(rechercheType::class, $article);
         $form->handleRequest($request);
 
@@ -76,13 +84,14 @@ class ArticleController extends AbstractController
 
         $conditions = array();
 
+        $session = $this->requestStack->getSession();
+
         $request = Request::createFromGlobals();
 
         $nom = $request->query->get('search');
         $max = $request->query->get('max');
         $page = $request->query->get('page');
         $tri = $request->query->get('tri');
-        $sens = $request->query->get('sens');
         $categorie = $request->query->get('categorie');
         $lieu = $request->query->get('lieu');
         $distance = $request->query->get('distance');
@@ -92,120 +101,219 @@ class ArticleController extends AbstractController
         $sup = $request->query->get('sup');
         $inf = $request->query->get('inf');
 
-        if(!isset($max)){
-            $max = '25';
+        if(isset($max)){
+            $session->set('max', $max);
+            $session->remove('page');
         }
 
-        if(!isset($page)){
-            $page = '1';
+        if(isset($page)){
+            $session->set('page', $page);
         }
 
-        if(!isset($tri)){
-            $tri = 'id';
+        if(isset($tri)){
+            if($session->get('tri', 'id') == $tri)
+                if($session->get('sens', 'ASC') == 'ASC'){
+                    $session->set('sens', 'DESC');
+                }else{
+                    $session->set('sens', 'ASC');
+                }
+            else{
+                $session->set('tri', $tri);
+                $session->remove('sens');
+            }
+            $session->remove('page');
         }
 
-        if(!isset($sens)){
-            $sens = 'ASC';
-        }
-
-        if(!isset($categorie) || $categorie == ''){
-            $categorie = '';
-        }else{
-            $conditions = array_merge($conditions, array_fill_keys(['categorie'], $categorie));
-        }
-
-        if(!isset($lieu) || $lieu == ''){
-            $lieu = '';
-            if(!isset($distance) || $distance == ''){
-                $distance = '';
+        if(isset($categorie)){
+            if($categorie != 'all'){
+                if(!($categories->find($categorie))){
+                    return new Response('<html><body>Cette catégorie n\'existe pas!</body></html>');
+                }else{
+                    $session->set('categorie', $categorie);
+                }
             }else{
-                $mesLieux = $lieux->findBy(['type' => $distance]);
-                $conditions = array_merge($conditions, array_fill_keys(['lieu_achat'], $mesLieux));
+                $session->remove('categorie');
+            }
+            $session->remove('page');
+        }
+        
+        if($session->has('categorie')){
+            $conditions = array_merge($conditions, array_fill_keys(['categorie'], $session->get('categorie')));
+        }
+
+        if(isset($distance)){
+            if($distance != 'a distance' && $distance != 'sur place' && $distance != 'all'){
+                return new Response('<html><body>Veuillez entrer une valeur valide!</body></html>');
+            }else{
+                if($distance == 'all'){
+                    $session->remove('distance');
+                }else{
+                    $session->set('distance', $distance);
+                    $session->remove('lieuAchat');
+                }  
+            }
+            $session->remove('page');
+        }
+
+        if(isset($lieu)){
+            if($lieu != 'all'){
+                if(!($lieux->find($lieu))){
+                    return new Response('<html><body>Ce lieu d\'achat n\'existe pas!</body></html>');
+                }else{
+                    if($session->has('distance')){
+                        if($lieux->find($lieu)->getType() != $session->get('distance')){
+                            $session->remove('distance');
+                        }
+                    }
+                    $session->set('lieuAchat', $lieu);
+                }
+            }else{
+                $session->remove('lieuAchat');
+            }
+            $session->remove('page');
+        }
+
+        if($session->has('lieuAchat')){
+            $conditions = array_merge($conditions, array_fill_keys(['lieu_achat'], $session->get('lieuAchat')));
+        }elseif($session->has('distance')){
+            $mesLieux = $lieux->findBy(['type' => $session->get('distance')]);
+            $conditions = array_merge($conditions, array_fill_keys(['lieu_achat'], $mesLieux));
+        }
+
+
+
+        if(isset($garantie)){
+            if($garantie != 'oui' && $garantie != 'non' && $garantie != 'all'){
+                return new Response('<html><body>Veuillez sélectionner une valeure valide!</body></html>');
+            }else{
+                if($garantie == 'all'){
+                    $session->remove('garantie');
+                }else{
+                    $session->set('garantie', $garantie);
+                }
+            }
+            $session->remove('page');
+        }
+
+        if($session->has('garantie')){       
+            $conditions = array_merge($conditions, array_fill_keys(['date_garantie'], $session->get('garantie')));
+        }
+
+
+        if(isset($apres)){
+            if($apres == ''){
+                $session->remove('apres');
+            }else{
+                $session->set('apres', $apres);
+            }
+            $session->remove('page');
+        }
+
+        if(isset($avant)){
+            if($avant == ''){
+                $session->remove('avant');
+            }else{
+                $session->set('avant', $avant);
+            }
+            $session->remove('page');
+        }
+
+
+        if($session->has('apres')){
+            if($session->has('avant')){
+                $conditions = array_merge($conditions, array_fill_keys(['date_achat'], ['entre', $session->get('apres'), $session->get('avant')]));
+            }else{
+                $conditions = array_merge($conditions, array_fill_keys(['date_achat'], ['apres', $session->get('apres')]));
             }
         }else{
-            $conditions = array_merge($conditions, array_fill_keys(['lieu_achat'], $lieu));
-            if(!isset($distance) || $distance == ''){
-                $distance = '';
+            if($session->has('avant')){
+                $conditions = array_merge($conditions, array_fill_keys(['date_achat'], ['avant', $session->get('avant')]));
             }
         }
 
-        if(!isset($garantie) || $garantie == ''){
-            $garantie = '';
-        }else{
-            $conditions = array_merge($conditions, array_fill_keys(['date_garantie'], $garantie));
-        }
-        if(!isset($apres) || $apres == ''){
-            $apres = '';
-        }else{
-            $conditions = array_merge($conditions, array_fill_keys(['date_achat'], ['apres', $apres]));
+
+
+        if(isset($sup)){
+            if($sup == ''){
+                $session->remove('sup');
+            }else{
+                $session->set('sup', $sup);
+            }
+            $session->remove('page');
         }
 
-        if(!isset($avant) || $avant == ''){
-            $avant = '';
-        }else{
-            $conditions = array_merge($conditions, array_fill_keys(['date_achat'], ['avant', $avant]));
+        if(isset($inf)){
+            if($inf == ''){
+                $session->remove('inf');
+            }else{
+                $session->set('inf', $inf);
+            }
+            $session->remove('page');
         }
 
-        if(!isset($sup) || $sup == ''){
-            $sup = '';
+
+        if($session->has('sup')){
+            if($session->has('inf')){
+                $conditions = array_merge($conditions, array_fill_keys(['prix'], ['entre', $session->get('sup'), $session->get('inf')]));
+            }else{
+                $conditions = array_merge($conditions, array_fill_keys(['prix'], ['sup', $session->get('sup')]));
+            }
         }else{
-            $conditions = array_merge($conditions, array_fill_keys(['prix'], ['sup', $sup]));
+            if($session->has('inf')){
+                $conditions = array_merge($conditions, array_fill_keys(['prix'], ['inf', $session->get('inf')]));
+            }
         }
 
-        if(!isset($inf) || $inf == ''){
-            $inf = '';
-        }else{
-            $conditions = array_merge($conditions, array_fill_keys(['prix'], ['inf', $inf]));
-        }
 
-        if(!isset($nom)){
-            $nom = '';
+
+        if(isset($nom)){
+            $session->set('nom', $nom);
+            $session->remove('page');
         }
 
         $myPage = $repository ->search(
-            $nom,
+            $session->get('nom', ''),
             $conditions,
-            $tri,
-            $sens,
-            $max,
-            $max * ($page - 1),
+            $session->get('tri', 'id'),
+            $session->get('sens', 'ASC'),
+            $session->get('max', 25),
+            $session->get('max', 25) * ($session->get('page', 1) - 1),
         );
 
         $articles = $repository ->search(
-            $nom,
-            $conditions
+            $session->get('nom', ''),
+            $conditions,
         );
         
         $maxArticles = count($articles);
 
-        $maxPages = ceil($maxArticles / $max);
+        $maxPages = ceil($maxArticles / $session->get('max', 25));
 
         //return new Response($response);
 
         // or render a template
         // in the template, print things with {{ article.name }}
-        return $this->render('liste/index.html.twig', [
+        return $this->render('article/index.html.twig', [
             'articles' => $myPage,
             'nbPageMax' =>  (string)$maxPages,
             'page_title' => 'Articles',
             'user' => $this->getUser(),
-            'type' => 'article',
-            'max_product' => $max,
-            'page' => $page,
-            'tri' => $tri,
-            'sens' => $sens,
-            'form' => $form,
-            'nom' => $nom,
+            'max_product' => $session->get('max', '25'),
+            'page' => $session->get('page', '1'),
+            'tri' => $session->get('tri', 'id'),
+            'sens' => $session->get('sens', 'ASC'),
+            'nom' => $session->get('nom'),
             'categories' => $categories,
-            'categorie' => $categorie,
+            'categorie' => $session->get('categorie', ''),
             'lieuxachats' => $lieux,
-            'lieu' => $lieu,
-            'distance' => $distance,
-            'garantie' => $garantie,
-            'apres' => $apres,
-            'avant' => $avant,
-            'sup' => $sup,
-            'inf' => $inf,
+            'lieu' => $session->get('lieuAchat', ''),
+            'distance' => $session->get('distance', ''),
+            'garantie' => $session->get('garantie', ''),
+            'apres' => $session->get('apres', ''),
+            'avant' => $session->get('avant', ''),
+            'sup' => $session->get('sup', ''),
+            'inf' => $session->get('inf', ''),
+            'type' => "article",
         ]);
     }
 

@@ -27,12 +27,11 @@
     let categGraph1 = new Chart(categorias1,{
         type: "pie",
         data: {
-            labels: {{"DeuxRoues", "Loisirs", "Patins", "Pièces", "Accessoires"}},
+            labels:{{ categNom|raw }},
             datasets: [{
-                label: "Répartition des catégories",  
-                data: {{4, 4, 3, 4, 6}},
-                price:[17500, 32200, 2500, 492, 6100],
-                backgroundColor: {{"pink", "green", "yellow", "red", "blue"}}
+                label: "Répartition des catégories",
+                data: {{ categCount|raw }},
+                backgroundColor: {{ categColor|raw }}
             }]
         }
     })
@@ -41,26 +40,29 @@
     let categGraph2 = new Chart(categorias2,{
         type: "bar",
         data: {
-            labels:["DeuxRoues", "Loisirs", "Patins", "Pièces", "Accessoires"],
+            labels:{{ categNom|raw }},
             datasets: [{
                 label: "Répartition des catégories",
-                data: [4, 4, 3, 4, 6],
-                price:[17500, 32200, 2500, 492, 6100],
-                backgroundColor: ["pink", "green", "yellow", "red", "blue"]
-            }]
+                data: {{ categCount|raw }},
+                backgroundColor:{{ categColor|raw }}
+            },]
         }
-    })  
+    }) 
 
     let categorias3 = document.querySelector("#categorias3")
     let categGraph3 = new Chart(categorias3,{
         type: "line",
         data: {
-            labels:["DeuxRoues", "Loisirs", "Patins", "Pièces", "Accessoires"],
+            labels:{{ categNom|raw }},
             datasets: [{
                 label: "Répartition des catégories",
-                data: [4, 4, 3, 4, 6],
-                price:[17500, 32200, 2500, 492, 6100],
-                backgroundColor: ["pink", "green", "yellow", "red", "blue"]
+                data: {{ categPrice|raw }},
+                backgroundColor: "rgb(255,255,255,0)",
+            },{
+                label: "test",
+                data: {{ categCount|raw }},
+                backgroundColor: "rgba(255,255,255,0)",
+                borderColor: "rgb(255,0,0)"
             }]
         }
     })       
